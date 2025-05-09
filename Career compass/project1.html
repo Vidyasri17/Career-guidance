@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Career Compass</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f9ff;
+    }
+    header {
+      background-color: #0b5ed7;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      background-color: #003d99;
+      padding: 10px 0;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav a:hover {
+      text-decoration: underline;
+    }
+    .container {
+      max-width: 700px;
+      margin: 30px auto;
+      background-color: white;
+      border-radius: 16px;
+      padding: 25px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+    h1, h2, p {
+      text-align: center;
+    }
+    button {
+      background-color: #0b5ed7;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      display: block;
+      margin: 20px auto;
+    }
+    button:hover {
+      background-color: #094cb0;
+    }
+    .option {
+      display: block;
+      background-color: #0b5ed7;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
+      margin: 10px 0;
+      cursor: pointer;
+      text-align: center;
+    }
+    .option:hover {
+      background-color: #094cb0;
+    }
+    #result ul {
+      padding-left: 20px;
+    }
+    img.banner {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Career Compass</h1>
+    <p>Helping You Discover the Right Direction</p>
+  </header>
+
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#about">About</a>
+    <a href="#explore">Explore Careers</a>
+    <a href="#quiz">Take Quiz</a>
+  </nav>
+
+  <div class="container" id="home">
+    <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1200&q=80" alt="Career Guidance" class="banner">
+    <h2>Welcome to Career Compass</h2>
+    <p>Unsure of your future? Take our quiz to discover career paths tailored to your interests and strengths.</p>
+    <button onclick="startQuiz()">Start Quiz</button>
+  </div>
+
+  <div class="container" id="about">
+    <h2>About Career Compass</h2>
+    <p>Career Compass is designed to help students who feel lost or uncertain about their future. Our interactive quiz assesses your interests and aligns them with ideal career paths. Whether you're artistic, analytical, or people-focused, we guide you with clarity.</p>
+  </div>
+
+  <div class="container" id="explore">
+    <h2>How the Quiz Works</h2>
+    <p>Answer a few simple questions about your preferences and passions. Based on your responses, we match you with top career domains, complete with job roles and learning paths to reach them. You can retake the quiz anytime!</p>
+  </div>
+
+  <div class="container" id="quiz" style="display:none">
+    <h2 id="questionText"></h2>
+    <div id="options"></div>
+  </div>
+
+  <div class="container" id="result" style="display:none">
+    <h2>Your Top 5 Career Matches</h2>
+    <ul id="careerList"></ul>
+    <button onclick="resetQuiz()">Close & Go to Home</button>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        text: "What type of activities do you enjoy the most?",
+        options: ["Solving problems", "Designing or creating", "Helping others", "Managing tasks", "Analyzing data"]
+      },
+      {
+        text: "Which subject did you like the most in school?",
+        options: ["Math", "Art", "Biology", "Business", "Computer Science"]
+      },
+      {
+        text: "What is your preferred working style?",
+        options: ["Independent", "Teamwork", "Creative freedom", "Structured tasks", "Research-based"]
+      },
+      {
+        text: "How do you prefer to solve a problem?",
+        options: ["Logically", "Visually", "Empathetically", "Strategically", "By experimenting"]
+      }
+    ];
+
+    const careerMap = {
+      "Math": { title: "Data Scientist", path: "BSc in Mathematics/CS > Data Analytics > Python, ML, SQL" },
+      "Art": { title: "UI/UX Designer", path: "B.Des or self-learn design tools > Projects > Build portfolio" },
+      "Biology": { title: "Healthcare Professional", path: "BSc/MBBS/Nursing > Specialize > Internships" },
+      "Business": { title: "Business Analyst", path: "BBA/MBA > Learn Excel, PowerBI, SQL > Case Studies" },
+      "Computer Science": { title: "Software Developer", path: "B.Tech in CSE > Learn DSA, Web Dev > Projects" },
+      "Solving problems": { title: "Engineer", path: "B.Tech > Specialize > Internships > Projects" },
+      "Designing or creating": { title: "Graphic Designer", path: "Design degree or tools > Freelance > Portfolio" },
+      "Helping others": { title: "Psychologist", path: "BA/MA in Psychology > Intern > License" },
+      "Managing tasks": { title: "Project Manager", path: "MBA or PMP > Learn Jira, Agile > Experience" },
+      "Analyzing data": { title: "Data Analyst", path: "Stats/CS > Excel, Python, SQL > Projects" }
+    };
+
+    let currentQuestion = 0;
+    let answers = [];
+
+    function startQuiz() {
+      document.getElementById("home").style.display = "none";
+      document.getElementById("quiz").style.display = "block";
+      document.getElementById("about").style.display = "none";
+      document.getElementById("explore").style.display = "none";
+      document.getElementById("result").style.display = "none";
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const q = questions[currentQuestion];
+      document.getElementById("questionText").innerText = q.text;
+      const optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
+      q.options.forEach(option => {
+        const btn = document.createElement("button");
+        btn.classList.add("option");
+        btn.innerText = option;
+        btn.onclick = () => selectOption(option);
+        optionsDiv.appendChild(btn);
+      });
+    }
+
+    function selectOption(option) {
+      answers.push(option);
+      currentQuestion++;
+      if (currentQuestion < questions.length) {
+        showQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      document.getElementById("quiz").style.display = "none";
+      document.getElementById("result").style.display = "block";
+      const counts = {};
+      answers.forEach(ans => {
+        if (careerMap[ans]) {
+          const career = careerMap[ans].title;
+          counts[career] = (counts[career] || 0) + 1;
+        }
+      });
+      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+      const careerList = document.getElementById("careerList");
+      careerList.innerHTML = "";
+      sorted.forEach(([career, _]) => {
+        const li = document.createElement("li");
+        const path = Object.values(careerMap).find(c => c.title === career).path;
+        li.innerHTML = `<strong>${career}</strong><br>Path: ${path}`;
+        careerList.appendChild(li);
+      });
+    }
+
+    function resetQuiz() {
+      currentQuestion = 0;
+      answers = [];
+      document.getElementById("quiz").style.display = "none";
+      document.getElementById("result").style.display = "none";
+      document.getElementById("home").style.display = "block";
+    }
+  </script>
+</body>
+</html>
